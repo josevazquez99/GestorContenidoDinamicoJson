@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Contenido</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <form id="addContentForm" class="form">
+            <h1>Agregar Contenido</h1>
+            <div class="form-field">
+                <label for="title">Título:</label>
+                <input type="text" id="title" name="title" autocomplete="off">
+                <small></small>
+            </div>
+            <div class="form-field">
+                <label for="description">Descripción:</label>
+                <input type="text" id="description" name="description" autocomplete="off">
+                <small></small>
+            </div>
+            <div class="form-field">
+                <label for="tipoContent">Tipo:</label>
+                <select id="tipoContent" name="tipoContent">
+                    <option value="nota">Nota</option>
+                    <option value="tarjeta">Tarjeta</option>
+                    <option value="evento">Evento</option>
+                </select>
+                <small></small>
+            </div>
+            <button type="submit">Agregar Contenido</button>
+        </form>
+    </div>
+    <ul id="contentList"></ul>
+    <script src="listaContenido.js"></script>
+</body>
+</html>
