@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Contenido</title>
-    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div class="container">
         <form id="addContentForm" class="form">
-            <h1>Agregar Contenido</h1>
+            <h1>Agregar/Editar Contenido</h1>
+            <input type="hidden" id="contentId">
             <div class="form-field">
                 <label for="title">Título:</label>
                 <input type="text" id="title" name="title" autocomplete="off">
@@ -28,7 +28,7 @@
                 </select>
                 <small></small>
             </div>
-            <button type="submit">Agregar Contenido</button>
+            <button type="submit" id="submitBtn">Agregar Contenido</button>
         </form>
     </div>
     <ul id="contentList"></ul>

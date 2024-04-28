@@ -1,70 +1,93 @@
-const titleEl = document.querySelector('#title');
-const descriptionEl = document.querySelector('#description');
-const typeEl = document.querySelector('#tipoContent');
-const form = document.querySelector('#addContentForm');
-const contentList = document.getElementById("contentList");
+const url = "http://localhost:3000/content";
 
-const isRequired = value => value !== '';
-const isBetween = (length, min, max) => length >= min && length <= max;
+// funcion para mostrar la lista
+async function getContenido() {
+    const respuesta = await fetch(url);
+    if (!respuesta.ok) {
+        console.error('Error al obtener los elementos');
+        return;
+    }
+    //convierte la respuesta a json , que se espera un array de elementos
+    const contenidos = await respuesta.json();
+    // rescato la lista de mi html
+    const ul = document.querySelector('#contentList');
+    //limpia el contenido actual
+    ul.innerHTML = '';
+    // recorro cada elemento
+    contenidos.forEach(elemento => {
+        const li = document.createElement('li');
+        const edit = document.createElement('button');
+        const remove = document.createElement('button');
 
-form.addEventListener('submit', function (e) {
-    e.preventDefault();
+        edit.innerText = 'Edit';
+        remove.innerText = 'Delete';
 
-    let title = titleEl.value;
-    let description = descriptionEl.value;
-    let type = typeEl.value;
+        edit.className = 'btn btn-warning edit';
+        remove.className = 'btn btn-danger remove';
 
-    let isTitleValid = checkInput(titleEl, 3, 30, 'El título es requerido y debe tener entre 3 y 30 caracteres.');
-    let isDescriptionValid = checkInput(descriptionEl, 5, 100, 'La descripción es requerida y debe tener entre 5 y 100 caracteres.');
+        li.innerText = `ID: ${elemento.id}, Titulo: ${elemento.title}, Descripcion: ${elemento.description}, Tipo: ${elemento.tipoContent} `;
+        li.append(edit, remove);
+        ul.append(li);
 
-    let isFormValid = isTitleValid && isDescriptionValid;
+        edit.addEventListener('click', () => loadElemento(elemento));
+        remove.addEventListener('click', () => deleteElemento(elemento.id));
+    });
+}
 
-    if (isFormValid) {
-        addContentToList({title, description, type});
-        form.reset();
+//cargar los datos del elemento en el formulario para la edicion
+async function loadElemento(elemento) {
+    document.getElementById('contentId').value = elemento.id;
+    document.getElementById('title').value = elemento.title;
+    document.getElementById('description').value = elemento.description;
+    document.getElementById('tipoContent').value = elemento.tipoContent;
+    document.getElementById('submitBtn').textContent = 'Editar Contenido';
+}
+// funcion para borrar elemento
+async function deleteElemento(id) {
+    const urlID = `${url}/${id}`;
+
+    const respuesta = await fetch(urlID, {
+        method: 'DELETE',
+    });
+
+    if (!respuesta.ok) {
+        console.error('Error al eliminar un elemento');
+    } else {
+        getContenido(); // Recargar la lista después de eliminar
+    }
+}
+
+//manejo de añadir o editar un contenido
+document.getElementById('addContentForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const id = document.getElementById('contentId').value;
+    const titulo = document.getElementById('title').value;
+    const descripcion = document.getElementById('description').value;
+    const tipo_contenido = document.getElementById('tipoContent').value;
+    const method = id ? 'PUT' : 'POST';
+    const urlID = id ? `${url}/${id}` : url;
+
+    const respuesta = await fetch(urlID, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            title: titulo,
+            description: descripcion,
+            tipoContent: tipo_contenido
+        })
+    });
+
+    if (!respuesta.ok) {
+        console.error('Error al añadir/editar un elemento');
+    } else {
+        document.getElementById('submitBtn').textContent = 'Agregar Contenido';
+        document.getElementById('addContentForm').reset();
+        document.getElementById('contentId').value = '';
+        getContenido(); // Recargar la lista
     }
 });
 
-function checkInput(el, min, max, errorMessage) {
-    let valid = false;
-    const value = el.value.trim();
-    if (!isRequired(value)) {
-        showError(el, 'Este campo no puede estar vacío.');
-    } else if (!isBetween(value.length, min, max)) {
-        showError(el, errorMessage);
-    } else {
-        showSuccess(el);
-        valid = true;
-    }
-    return valid;
-}
-
-function addContentToList(content) {
-    let li = document.createElement("li");
-
-    let buttonEdit = document.createElement("button");
-    buttonEdit.textContent = "Editar";
-    buttonEdit.classList.add("edit");
-    buttonEdit.setAttribute("data-id", content.title);
-
-    let buttonDel = document.createElement("button");
-    buttonDel.textContent = "Borrar";
-    buttonDel.classList.add("delete");
-    buttonDel.setAttribute("data-id", content.title);
-
-    li.textContent = `${content.title} : ${content.description} : ${content.type} : `;
-    li.appendChild(buttonEdit);
-    li.appendChild(buttonDel);
-    contentList.appendChild(li);
-}
-
-function showError(el, message) {
-    const small = el.nextElementSibling;
-    small.textContent = message;
-    small.style.color = 'red';
-}
-
-function showSuccess(el) {
-    const small = el.nextElementSibling;
-    small.textContent = '';
-}
+getContenido();
